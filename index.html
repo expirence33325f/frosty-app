@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Frosty Box — Вход</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:       #080d1e;
+      --bg-input:      rgba(255,255,255,0.06);
+      --border:        rgba(255,255,255,0.12);
+      --border-active: rgba(255,255,255,0.55);
+      --text:          #ffffff;
+      --text-dim:      rgba(255,255,255,0.45);
+      --btn-num-bg:    rgba(255,255,255,0.07);
+      --btn-num-hover: rgba(255,255,255,0.13);
+      --btn-login-bg:  rgba(255,255,255,0.92);
+      --btn-login-txt: #08101f;
+      --error:         rgba(255,100,100,0.9);
+      --star-color:    rgba(200,214,255,0.55);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* ── Stars ────────────────────────────────── */
+    .stars {
+      position: fixed; inset: 0; z-index: 0;
+      overflow: hidden; pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--star-color);
+      animation: twinkle var(--d, 3s) infinite alternate ease-in-out;
+    }
+    @keyframes twinkle {
+      from { opacity: .1; transform: scale(.8); }
+      to   { opacity: .6; transform: scale(1); }
+    }
+
+    /* ── Layout ───────────────────────────────── */
+    .app {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      min-height: 100dvh;
+      padding: 0 0 env(safe-area-inset-bottom);
+    }
+
+    /* ── Header ───────────────────────────────── */
+    .header {
+      width: 100%;
+      display: flex; align-items: center; justify-content: center;
+      padding: 30px 24px 18px;
+    }
+    .logo-wrap {
+      display: flex; flex-direction: row; align-items: center; gap: 14px;
+    }
+    .logo-icon {
+      width: 42px; height: 42px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+    .logo-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 24px; font-weight: 700; letter-spacing: .5px;
+      color: #ffffff;
+    }
+
+    /* ── ID Display ───────────────────────────── */
+    .id-display {
+      display: flex; gap: 10px;
+      padding: 4px 24px 0;
+      margin-bottom: 2px;
+    }
+    .id-cell {
+      width: 58px; height: 60px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--bg-input);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Michroma', sans-serif;
+      font-size: 20px; font-weight: 700;
+      color: var(--text);
+      transition: border-color .2s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .id-cell span { transform: scaleX(1.25); display: inline-block; }
+    .id-cell.active {
+      border-color: var(--border-active);
+      box-shadow: 0 0 12px rgba(255,255,255,.08);
+    }
+    .id-cell.active::after {
+      content: '';
+      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+      width: 2px; height: 18px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 2px;
+      animation: blink 1s infinite;
+    }
+    .id-cell.filled { border-color: rgba(255,255,255,0.35); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── Get ID link ──────────────────────────── */
+    .get-id-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; padding: 10px 0 6px;
+    }
+    .get-id-line { flex: 1; height: 1px; background: var(--border); max-width: 55px; }
+    .get-id-btn {
+      font-size: 14px; font-weight: 600;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 8px 30px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      transition: color .2s, border-color .2s, background .2s;
+      letter-spacing: .5px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .get-id-btn:active { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,.4); color: rgba(255,255,255,.9); }
+
+    /* ── Login Button ─────────────────────────── */
+    .login-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 24px 10px; width: 100%;
+    }
+    .login-icon-wrap {
+      width: 54px; height: 54px; border-radius: 14px;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .login-icon-wrap svg { width: 24px; height: 24px; }
+    .btn-login {
+      flex: 1; height: 54px; border-radius: 14px;
+      border: none; cursor: pointer;
+      background: var(--btn-login-bg);
+      font-family: 'Michroma', sans-serif;
+      font-size: 15px; font-weight: 700; letter-spacing: 2px;
+      color: var(--btn-login-txt);
+      text-transform: uppercase;
+      transition: opacity .15s, transform .1s;
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-login span { transform: scaleX(1.3); display: inline-block; }
+    .btn-login:active { opacity: .85; transform: scale(.98); }
+
+    /* ── Error ────────────────────────────────── */
+    .error-msg {
+      font-size: 13px; color: var(--error);
+      min-height: 18px; padding: 0 24px 4px;
+      text-align: center; font-weight: 500;
+      opacity: 0; transform: translateY(-4px);
+      transition: opacity .25s, transform .25s;
+    }
+    .error-msg.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Divider ──────────────────────────────── */
+    .divider {
+      width: calc(100% - 40px); height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0 20px 2px;
+    }
+
+    /* ── Numpad ───────────────────────────────── */
+    .numpad {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      padding: 10px 20px 20px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .num-btn {
+      border: none; border-radius: 16px;
+      background: var(--btn-num-bg);
+      color: var(--text);
+      font-family: 'Michroma', sans-serif;
+      font-size: 20px; font-weight: 700;
+      cursor: pointer;
+      aspect-ratio: 1 / 1;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .1s, transform .08s;
+      position: relative; overflow: hidden;
+    }
+    .num-btn span { transform: scaleX(1.3); display: inline-block; }
+    .num-btn:active { background: var(--btn-num-hover); transform: scale(.92); }
+
+    .num-btn.zero { grid-column: 2 / 3; }
+    .num-btn.backspace { grid-column: 3 / 4; grid-row: 4 / 5; }
+    .num-btn.backspace svg { width: 24px; height: 24px; transform: scaleX(0.8); }
+
+    /* ── Shake animation ──────────────────────── */
+    @keyframes shake {
+      0%,100%{ transform: translateX(0); }
+      20%{ transform: translateX(-8px); }
+      40%{ transform: translateX(8px); }
+      60%{ transform: translateX(-5px); }
+      80%{ transform: translateX(5px); }
+    }
+    .shake { animation: shake .4s ease; }
+
+    /* ── Ripple ───────────────────────────────── */
+    .ripple {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,.18);
+      transform: scale(0);
+      animation: ripple-anim .4s linear forwards;
+      pointer-events: none;
+    }
+    @keyframes ripple-anim {
+      to { transform: scale(3); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Stars -->
+<div class="stars" id="stars"></div>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-wrap">
+      <img src="logo.png" alt="Logo" class="logo-icon">
+      <span class="logo-title">Frosty Box</span>
+    </div>
+  </div>
+
+  <!-- ID cells -->
+  <div class="id-display" id="idDisplay">
+    <div class="id-cell" id="cell0"></div>
+    <div class="id-cell" id="cell1"></div>
+    <div class="id-cell" id="cell2"></div>
+    <div class="id-cell" id="cell3"></div>
+    <div class="id-cell" id="cell4"></div>
+  </div>
+
+  <!-- Get ID row -->
+  <div class="get-id-row">
+    <div class="get-id-line"></div>
+    <a href="https://t.me/frostyceo" target="_blank" class="get-id-btn" id="getIdBtn">Получить ID</a>
+    <div class="get-id-line"></div>
+  </div>
+
+  <!-- Login row -->
+  <div class="login-row">
+    <button class="btn-login" id="loginBtn"><span>ВОЙТИ</span></button>
+  </div>
+
+  <!-- Error message -->
+  <div class="error-msg" id="errorMsg">ID не найден</div>
+
+  <!-- Divider -->
+  <div class="divider"></div>
+
+  <!-- Numpad -->
+  <div class="numpad" id="numpad">
+    <button class="num-btn" data-val="1"><span>1</span></button>
+    <button class="num-btn" data-val="2"><span>2</span></button>
+    <button class="num-btn" data-val="3"><span>3</span></button>
+    <button class="num-btn" data-val="4"><span>4</span></button>
+    <button class="num-btn" data-val="5"><span>5</span></button>
+    <button class="num-btn" data-val="6"><span>6</span></button>
+    <button class="num-btn" data-val="7"><span>7</span></button>
+    <button class="num-btn" data-val="8"><span>8</span></button>
+    <button class="num-btn" data-val="9"><span>9</span></button>
+    <button class="num-btn zero" data-val="0"><span>0</span></button>
+    <button class="num-btn backspace" id="backBtn">
+      <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 6L3 13L10 20H23V6H10Z" stroke="rgba(255,255,255,.5)" stroke-width="1.8" stroke-linejoin="round" fill="rgba(255,255,255,.06)"/>
+        <path d="M15 10L20 16M20 10L15 16" stroke="rgba(255,255,255,.8)" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+</div>
+
+<script>
+  // ── Stars ──────────────────────────────────────────────────
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + .5;
+    s.style.cssText = `
+      width:${size}px;height:${size}px;
+      top:${Math.random()*100}%;left:${Math.random()*100}%;
+      --d:${(Math.random()*4+2).toFixed(1)}s;
+      animation-delay:${(Math.random()*5).toFixed(1)}s;
+    `;
+    starsEl.appendChild(s);
+  }
+
+  // ── State ──────────────────────────────────────────────────
+  let digits = [];
+  const MAX = 5;
+  const cells  = Array.from({ length: MAX }, (_, i) => document.getElementById('cell' + i));
+  const errMsg = document.getElementById('errorMsg');
+  const display = document.getElementById('idDisplay');
+
+  function render() {
+    cells.forEach((c, i) => {
+      c.innerHTML = digits[i] !== undefined ? `<span>${digits[i]}</span>` : '';
+      c.className = 'id-cell';
+      if (i === digits.length && digits.length < MAX) c.classList.add('active');
+      if (digits[i] !== undefined) c.classList.add('filled');
+    });
+  }
+
+  function showError(msg) {
+    errMsg.textContent = msg;
+    errMsg.classList.add('visible');
+    display.classList.add('shake');
+    setTimeout(() => display.classList.remove('shake'), 450);
+    setTimeout(() => errMsg.classList.remove('visible'), 2200);
+  }
+
+  function ripple(btn, e) {
+    const r = document.createElement('span');
+    r.className = 'ripple';
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    r.style.cssText = `width:${size}px;height:${size}px;left:${(e.clientX??rect.left+rect.width/2)-rect.left-size/2}px;top:${(e.clientY??rect.top+rect.height/2)-rect.top-size/2}px`;
+    btn.appendChild(r);
+    setTimeout(() => r.remove(), 450);
+  }
+
+  // ── Numpad clicks ──────────────────────────────────────────
+  document.getElementById('numpad').addEventListener('click', (e) => {
+    const btn = e.target.closest('.num-btn');
+    if (!btn) return;
+    const val = btn.dataset.val;
+    if (val !== undefined) {
+      if (digits.length < MAX) {
+        digits.push(val);
+        render();
+        ripple(btn, e);
+        // Haptic
+        if (window.Telegram?.WebApp?.HapticFeedback) {
+          Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        }
+      }
+    }
+  });
+
+  document.getElementById('backBtn').addEventListener('click', (e) => {
+    if (digits.length > 0) {
+      digits.pop();
+      render();
+      errMsg.classList.remove('visible');
+    }
+    ripple(document.getElementById('backBtn'), e);
+  });
+
+  // ── Login ──────────────────────────────────────────────────
+  document.getElementById('loginBtn').addEventListener('click', (e) => {
+    ripple(document.getElementById('loginBtn'), e);
+    if (digits.length < MAX) {
+      showError(`Введите ${MAX}-значный ID`);
+      return;
+    }
+    const id = digits.join('');
+    // Always show not found (static demo)
+    showError('ID не найден');
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+      Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+    }
+  });
+
+  // ── Telegram WebApp init ───────────────────────────────────
+  if (window.Telegram?.WebApp) {
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand();
+  }
+
+  render();
+</script>
+
+</body>
+</html>
